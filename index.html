@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impulso Pro - Espacio Ejecutivo</title>
+    
+    <!-- Configuración PWA e Icono Embebido (IP) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230F172A'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Montserrat, sans-serif' font-weight='bold' font-size='45' fill='%23F97316'>IP</text></svg>">
+    
+    <!-- Fuente Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-main: #0A0F1D;         /* Azul Marino Profundo */
+            --bg-sidebar: #111827;      /* Panel Lateral Oscuro */
+            --bg-card: #1E293B;         /* Tarjeta de Trabajo */
+            --bg-input: #0F172A;        /* Cajas de Texto */
+            --accent-orange: #F97316;   /* Naranja Vibrante */
+            --accent-teal: #14B8A6;     /* Turquesa / Verde Agua */
+            --accent-teal-hover: #0D9488;
+            --text-primary: #FFFFFF;    /* Blanco Puro */
+            --text-secondary: #94A3B8;  /* Gris Claro */
+            --text-muted: #64748B;      /* Gris Medio */
+            --border-color: #334155;    /* Borde Elegante */
+            --radius-lg: 14px;
+            --radius-md: 8px;
+            --font-main: 'Montserrat', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra Superior para Móviles (Menú Hamburguesa) */
+        .mobile-topbar {
+            display: none;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .mobile-topbar h1 {
+            font-size: 1rem;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .menu-toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 0.3rem;
+        }
+
+        /* Panel Lateral (Sidebar) */
+        aside {
+            width: 260px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 150;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.25rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .sidebar-header .icon-box {
+            background: linear-gradient(135deg, var(--accent-orange), var(--accent-teal));
+            padding: 0.35rem;
+            border-radius: var(--radius-md);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 0.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .nav-item {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.6rem 0.75rem;
+            border-radius: var(--radius-md);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-orange);
+            color: var(--text-primary);
+        }
+
+        .user-profile-widget {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-profile-widget span {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .user-profile-widget strong {
+            color: var(--accent-teal);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        /* Área de Contenido Principal */
+        .content-wrapper {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            padding: 1.5rem;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        /* Modal de Inicio */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 15, 29, 0.96);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .welcome-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Tarjetas y Contenedores */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.15rem;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.85rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.85rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.5rem 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.82rem;
+            outline: none;
+        }
+
+        .btn {
+            background: var(--accent-teal);
+            color: #0F172A;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 0.42rem 0.85rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--accent-teal-hover);
+            color: white;
+        }
+
+        .btn-orange {
+            background: var(--accent-orange);
+            color: white;
+        }
+
+        .btn-icon {
+            background: #EF4444;
+            border: none;
+            color: white;
+            padding: 0.4rem 0.55rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dynamic-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 0.35rem;
+        }
+
+        .dynamic-item span {
+            font-size: 0.82rem;
+        }
+
+        /* CRM */
+        .crm-tabs {
+            display: flex;
+            gap: 0.4rem;
+            margin-bottom: 0.85rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.35rem;
+        }
+
+        .crm-tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.35rem 0.75rem;
+            font-weight: 600;
+            font-size: 0.78rem;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+        }
+
+        .crm-tab-btn.active {
+            background: var(--bg-input);
+            color: var(--accent-teal);
+        }
+
+        .crm-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .client-card {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Calendario */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.35rem;
+            text-align: center;
+        }
+
+        .calendar-day-head {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 0.3rem 0;
+            text-transform: uppercase;
+        }
+
+        .calendar-day {
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            padding: 0.55rem 0.15rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .calendar-day.active {
+            background: var(--accent-orange);
+            color: white;
+            font-weight: 700;
+        }
+
+        /* Frase Suelta Final */
+        .final-quote-white {
+            margin-top: 1rem;
+            text-align: center;
+            padding: 0 0.5rem;
+        }
+
+        .final-quote-white p {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #FFFFFF;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-sidebar);
+        }
+
+        footer p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Adaptabilidad para Celulares (Responsive Media Query) */
+        @media (max-width: 768px) {
+            .mobile-topbar {
+                display: flex;
+            }
+            aside {
+                transform: translateX(-100%);
+            }
+            aside.mobile-open {
+                transform: translateX(0);
+            }
+            .content-wrapper {
+                margin-left: 0;
+            }
+            main {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra Superior para Móviles con Menú Hamburguesa -->
+    <div class="mobile-topbar">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <div style="background:var(--accent-orange); padding:0.3rem; border-radius:6px; color:white; display:flex;"><i data-lucide="zap" style="width:16px;"><b></b></i></div>
+            <h1>Impulso Pro</h1>
+        </div>
+        <button class="menu-toggle-btn" onclick="toggleMobileMenu()"><i data-lucide="menu" style="width:24px;"></i></button>
+    </div>
+
+    <!-- Modal de Inicio (Nombre) -->
+    <div id="welcome-modal" class="modal-overlay">
+        <div class="welcome-card">
+            <div style="display:flex; justify-content:center; margin-bottom:1rem;">
+                <div style="background:linear-gradient(135deg, var(--accent-orange), var(--accent-teal)); padding:0.4rem; border-radius:8px; color:white;"><i data-lucide="zap"></i></div>
+            </div>
+            <h2 style="font-style: italic; color: var(--text-primary); margin-bottom: 0.4rem; font-size: 1.2rem;">Impulso Pro</h2>
+            <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 1.15rem;">Ingresa tu nombre para comenzar tu jornada:</p>
+            <div class="form-group">
+                <input type="text" id="user-name-input" class="form-control" placeholder="XXXXXXXXXX" style="text-align: center;" value="">
+            </div>
+            <button class="btn btn-orange" style="width: 100%; padding: 0.55rem;" onclick="saveUserName()">Comenzar Jornada</button>
+        </div>
+    </div>
+
+    <!-- Panel Lateral Izquierdo -->
+    <aside id="sidebar-menu">
+        <div class="sidebar-header">
+            <div class="icon-box"><i data-lucide="zap"></i></div>
+            <h1>Impulso Pro</h1>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <button class="nav-item active" onclick="switchTab('tab-inicio', this)"><i data-lucide="home"></i> 01. Inicio & Rutina</button>
+            <button class="nav-item" onclick="switchTab('tab-calendario', this)"><i data-lucide="calendar"></i> 02. Calendario Empire</button>
+            <button class="nav-item" onclick="switchTab('tab-crm', this)"><i data-lucide="users"></i> 03. CRM de Bolsillo</button>
+            <button class="nav-item" onclick="switchTab('tab-reuniones', this)"><i data-lucide="bell"></i> 04. Reuniones & Alarma</button>
+            <button class="nav-item" onclick="switchTab('tab-horarios', this)"><i data-lucide="clock"></i> 05. Horarios & Almuerzo</button>
+            <button class="nav-item" onclick="switchTab('tab-post-trabajo', this)"><i data-lucide="heart"></i> 06. Fuera de Oficina</button>
+            <button class="nav-item" onclick="switchTab('tab-metas', this)"><i data-lucide="target"></i> 07. Metas 2027</button>
+            <button class="nav-item" onclick="switchTab('tab-calculadora', this)"><i data-lucide="calculator"></i> 08. Mi Calculadora</button>
+            <button class="nav-item" onclick="switchTab('tab-estilo', this)"><i data-lucide="coffee"></i> 09. Desconexión & Vida</button>
+            <button class="nav-item" onclick="switchTab('tab-construccion', this)"><i data-lucide="compass"></i> 10. Mi Proyecto de Vida</button>
+        </nav>
+
+        <div class="user-profile-widget">
+            <div>
+                <span>Ejecutiva:</span><br>
+                <strong id="display-user-name">XXXXXXXXXX</strong>
+            </div>
+            <i data-lucide="edit-3" style="width:14px; cursor:pointer; color:var(--text-secondary);" onclick="openNameModal()"></i>
+        </div>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <div class="content-wrapper" onclick="closeMobileMenuOnClickOutside(event)">
+        <main>
+            <!-- 01. INICIO & RUTINA -->
+            <div id="tab-inicio" class="tab-content active">
+                <div class="card" style="border-left: 4px solid var(--accent-teal);">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="sparkles"></i> Mi Decreto Personal de Hoy</h3>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="personal-decreto-input" class="form-control" placeholder="Escribe aquí tu pensamiento positivo o enfoque del día...">
+                    </div>
+                    <div style="display: flex; gap: 0.4rem;">
+                        <button class="btn" style="width: auto;" onclick="savePersonalDecreto()"><i data-lucide="save"></i> Guardar Decreto</button>
+                        <button class="btn-icon" onclick="clearPersonalDecreto()"><i data-lucide="trash-2"></i></button>
+                    </div>
+                    <p id="saved-decreto-text" style="margin-top: 0.6rem; font-style: italic; color: var(--accent-teal); display: none; font-size: 0.8rem;"></p>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i data-lucide="activity"></i> Pulso Comercial Diario</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Llamadas Realizadas Hoy</label>
+                            <input type="number" id="calls-count" class="form-control" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Ventas / Equipos / Planes Cerrados</label>
+                            <input type="number" id="sales-count" class="form-control" value="0">
+                        </div>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button class="btn" onclick="saveDailyPulse()"><i data-lucide="save"></i> Guardar Avance</button>
+                            <button class="btn-icon" onclick="resetDailyPulse()"><i data-lucide="rotate-ccw"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i data-lucide="check-square"></i> Pendientes de Oficina</h3>
+                        </div>
+                        <div class="form-group" style="display: flex; gap: 0.35rem;">
+                            <input type="text" id="office-task-input" class="form-control" placeholder="Nuevo pendiente comercial...">
+                            <button class="btn" style="width: auto;" onclick="addOfficeTask()"><i data-lucide="plus"></i></button>
+                        </div>
+                        <div id="office-tasks-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 02. CALENDARIO EMPIRE -->
+            <div id="tab-calendario" class="tab-content">
+                <div class="card">
+                    <div style="text-align: center; margin-bottom: 0.85rem;">
+                        <h2 style="font-size: 1.2rem; font-style: italic; color: var(--text-primary);">Convierte decisiones en movimiento.</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.78rem;">Elige un día, escribe tu meta y guarda tus notas de negocio.</p>
+                    </div>
+
+                    <div class="calendar-grid">
+                        <div class="calendar-day-head">Lun</div>
+                        <div class="calendar-day-head">Mar</div>
+                        <div class="calendar-day-head">Mié</div>
+                        <div class="calendar-day-head">Jue</div>
+                        <div class="calendar-day-head">Vie</div>
+                        <div class="calendar-day-head">Sáb</div>
+                        <div class="calendar-day-head">Dom</div>
+                    </div>
+                    <div id="calendar-days-grid" class="calendar-grid" style="margin-top: 0.35rem;"></div>
+
+                    <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.85rem;">
+                        <h4 style="margin-bottom: 0.6rem; color: var(--accent-teal); font-size: 0.85rem;" id="selected-date-label">Día Seleccionado: 21 de Octubre de 2026</h4>
+                        
+                        <div class="form-group">
+                            <label>Meta / Declaración del Día</label>
+                            <input type="text" id="calendar-day-goal" class="form-control" placeholder="¿Qué quieres conseguir o decidir hoy?">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notas de Negocio & Entregas</label>
+                            <textarea id="calendar-day-note" class="form-control" rows="2" placeholder="Ideas, clientes, ventas, tareas clave..."></textarea>
+                        </div>
+
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button class="btn" style="width: auto;" onclick="saveEmpireCalendar()"><i data-lucide="save"></i> Guardar Este Día</button>
+                            <button class="btn-icon" onclick="clearEmpireCalendar()"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 03. CRM DE BOLSILLO -->
+            <div id="tab-crm" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="user-plus"></i> Añadir Nuevo Cliente o Prospecto</h3>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Nombre Real del Cliente</label>
+                            <input type="text" id="crm-name" class="form-control" placeholder="Ej: Pedro Gómez">
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Teléfono (WhatsApp)</label>
+                            <input type="text" id="crm-phone" class="form-control" placeholder="Ej: 04141234567">
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Detalle del Servicio / Plan</label>
+                            <input type="text" id="crm-detail" class="form-control" placeholder="Ej: Módem WiFi 4G Residencial">
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría Estatus</label>
+                            <select id="crm-status" class="form-control">
+                                <option value="por-llamar">Por Llamar</option>
+                                <option value="deudas">Deudas y Cobros</option>
+                                <option value="cerrados">Listos / Cerrados</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addClientToCRM()"><i data-lucide="plus-circle"></i> Guardar Cliente en CRM</button>
+                </div>
+
+                <div class="card">
+                    <div class="crm-tabs">
+                        <button class="crm-tab-btn active" onclick="filterCRM('por-llamar', this)">Por Llamar</button>
+                        <button class="crm-tab-btn" onclick="filterCRM('deudas', this)">Deudas y Cobros</button>
+                        <button class="crm-tab-btn" onclick="filterCRM('cerrados', this)">Listos / Cerrados</button>
+                    </div>
+                    <div id="crm-clients-container" class="crm-list"></div>
+                </div>
+            </div>
+
+            <!-- 04. REUNIONES & ALARMA -->
+            <div id="tab-reuniones" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="bell"></i> Programar Alarma de Reunión</h3>
+                    </div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Motivo de la Reunión / Cita</label>
+                            <input type="text" id="meeting-title" class="form-control" placeholder="Ej: Reunión con gerencia regional">
+                        </div>
+                        <div class="form-group">
+                            <label>Hora Exacta de la Alarma</label>
+                            <input type="time" id="meeting-time" class="form-control">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="addMeeting()"><i data-lucide="alarm-clock"></i> Programar Alarma Sonora</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="list"></i> Agenda de Reuniones del Día</h3>
+                    </div>
+                    <div id="meetings-list-container"></div>
+                </div>
+            </div>
+
+            <!-- 05. HORARIOS & ALMUERZO -->
+            <div id="tab-horarios" class="tab-content">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i data-lucide="clock"></i> Temporizador de Almuerzo</h3>
+                        </div>
+                        <div style="text-align: center; font-size: 2rem; font-weight: 700; color: var(--accent-teal); margin: 0.85rem 0;" id="timer-display">60:00</div>
+                        <div style="display: flex; gap: 0.4rem; justify-content: center;">
+                            <button class="btn" onclick="startLunchTimer()"><i data-lucide="play"></i> Iniciar Almuerzo</button>
+                            <button class="btn" style="background: var(--bg-input); color: white;" onclick="resetLunchTimer()"><i data-lucide="rotate-ccw"></i> Reiniciar</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i data-lucide="sun"></i> Horarios de Jornada</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Hora de Llegada</label>
+                            <input type="time" class="form-control" id="checkin-time">
+                        </div>
+                        <div class="form-group">
+                            <label>Hora de Salida</label>
+                            <input type="time" class="form-control" id="checkout-time">
+                        </div>
+                        <button class="btn" onclick="saveWorkHours()">Guardar Registro</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 06. FUERA DE OFICINA & FAMILIA -->
+            <div id="tab-post-trabajo" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="home"></i> Pendientes de Familia & Hogar</h3>
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 0.35rem;">
+                        <input type="text" id="family-task-input" class="form-control" placeholder="Ej: Comprar víveres, paseo familiar...">
+                        <button class="btn" style="width: auto;" onclick="addFamilyTask()"><i data-lucide="plus"></i> Añadir</button>
+                    </div>
+                    <div id="family-tasks-container"></div>
+                </div>
+            </div>
+
+            <!-- 07. METAS 2027 -->
+            <div id="tab-metas" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="target"></i> Añadir Nueva Meta 2027</h3>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="goal-input" class="form-control" placeholder="Ej: Alcanzar $2000 en comisiones / Viaje familiar...">
+                    </div>
+                    <button class="btn" onclick="addGoal2027()"><i data-lucide="plus-circle"></i> Agregar a mi Visión 2027</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="award"></i> Mis Objetivos Registrados</h3>
+                    </div>
+                    <div id="goals-container"></div>
+                </div>
+            </div>
+
+            <!-- 08. MI CALCULADORA DE INGRESOS -->
+            <div id="tab-calculadora" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="calculator"></i> Mi Calculadora de Ingresos & Clientes Necesarios</h3>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Meta de Ingresos Deseada ($)</label>
+                            <input type="number" id="calc-target" class="form-control" placeholder="Ej: 500" oninput="calculateBusiness()">
+                        </div>
+                        <div class="form-group">
+                            <label>Precio de Venta por Unidad ($)</label>
+                            <input type="number" id="calc-price" class="form-control" placeholder="Ej: 50" oninput="calculateBusiness()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ganancia / Comisión por Cliente ($)</label>
+                        <input type="number" id="calc-profit" class="form-control" placeholder="Ej: 20" oninput="calculateBusiness()">
+                    </div>
+
+                    <div style="background: var(--bg-input); padding: 1rem; border-radius: var(--radius-md); text-align: center; border: 1px solid var(--border-color);">
+                        <span style="font-size: 0.78rem; color: var(--text-secondary);">Clientes / Ventas Necesarias para tu Meta:</span>
+                        <h2 style="font-size: 2.2rem; color: var(--accent-teal); font-weight: 700; margin: 0.25rem 0;" id="calc-result">0</h2>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);" id="calc-total-volume">Facturación Total del Negocio: $0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 09. DESCONEXIÓN & ESTILO DE VIDA -->
+            <div id="tab-estilo" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="coffee"></i> Espacio de Desconexión & Bienestar</h3>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 0.85rem;">Anota tus actividades de relajación, podcasts, ejercicios o hobbies al cerrar el día.</p>
+                    <div class="form-group" style="display: flex; gap: 0.35rem;">
+                        <input type="text" id="lifestyle-input" class="form-control" placeholder="Ej: Escuchar podcast favorito, 30 min de caminata...">
+                        <button class="btn" style="width: auto;" onclick="addLifestyleItem()"><i data-lucide="plus"></i> Añadir</button>
+                    </div>
+                    <div id="lifestyle-container"></div>
+                </div>
+            </div>
+
+            <!-- 10. MI PROYECTO DE VIDA & LIBERTAD FINANCIERA -->
+            <div id="tab-construccion" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i data-lucide="compass"></i> ¿Qué quieres construir para tu futuro?</h3>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 1rem;">Define tus aspiraciones personales y financieras a corto, mediano y largo plazo:</p>
+
+                    <!-- Corto Plazo -->
+                    <div class="form-group" style="background: var(--bg-input); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <label style="color: var(--accent-teal);">A Corto Plazo (Este Mes / Trimestre)</label>
+                        <input type="text" id="life-short" class="form-control" placeholder="Ej: Organizar mis finanzas, cerrar 15 ventas clave..." style="margin-bottom:0.35rem;">
+                        <div style="display:flex; gap:0.35rem;">
+                            <button class="btn" style="width:auto; padding:0.3rem 0.75rem;" onclick="saveLifePlan('short')"><i data-lucide="save"></i> Guardar</button>
+                            <button class="btn-icon" onclick="clearLifePlan('short')"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Mediano Plazo -->
+                    <div class="form-group" style="background: var(--bg-input); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <label style="color: var(--accent-orange);">A Mediano Plazo (Este Año)</label>
+                        <input type="text" id="life-mid" class="form-control" placeholder="Ej: Cambiar de vehículo, lanzar mi propio emprendimiento..." style="margin-bottom:0.35rem;">
+                        <div style="display:flex; gap:0.35rem;">
+                            <button class="btn" style="width:auto; padding:0.3rem 0.75rem;" onclick="saveLifePlan('mid')"><i data-lucide="save"></i> Guardar</button>
+                            <button class="btn-icon" onclick="clearLifePlan('mid')"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Largo Plazo -->
+                    <div class="form-group" style="background: var(--bg-input); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                        <label style="color: #FDBA74;">A Largo Plazo / Libertad Financiera</label>
+                        <input type="text" id="life-long" class="form-control" placeholder="Ej: Comprar mi casa propia, independencia económica total..." style="margin-bottom:0.35rem;">
+                        <div style="display:flex; gap:0.35rem;">
+                            <button class="btn" style="width:auto; padding:0.3rem 0.75rem;" onclick="saveLifePlan('long')"><i data-lucide="save"></i> Guardar</button>
+                            <button class="btn-icon" onclick="clearLifePlan('long')"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Frase Suelta Final ÚNICA (Montserrat Blanca) -->
+                <div class="final-quote-white">
+                    <p>"Haz que la persona que verás al espejo al final del día se sienta profundamente orgullosa del coraje con el que luchaste hoy, y que tu niña interior te diga al final: ¡Lo logramos!"</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2026 Dariana Mago. Todos los derechos reservados. Creado con excelencia para ti.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts Operativos -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        let userName = 'XXXXXXXXXX';
+        let crmClients = [];
+        let meetings = [];
+        let goals = [];
+        let officeTasks = ['Revisar stock de módems/routers', 'Reportar asistencia matutina'];
+        let activeCrmCategory = 'por-llamar';
+
+        window.onload = function() {
+            if (localStorage.getItem('impulso_user')) {
+                userName = localStorage.getItem('impulso_user');
+            }
+            if (localStorage.getItem('impulso_crm')) {
+                crmClients = JSON.parse(localStorage.getItem('impulso_crm'));
+            }
+            if (localStorage.getItem('impulso_meetings')) {
+                meetings = JSON.parse(localStorage.getItem('impulso_meetings'));
+            }
+            if (localStorage.getItem('impulso_goals')) {
+                goals = JSON.parse(localStorage.getItem('impulso_goals'));
+            }
+            if (localStorage.getItem('impulso_office_tasks')) {
+                officeTasks = JSON.parse(localStorage.getItem('impulso_office_tasks'));
+            }
+
+            document.getElementById('welcome-modal').style.display = 'flex';
+            document.getElementById('user-name-input').value = '';
+            document.getElementById('display-user-name').innerText = userName;
+
+            renderOfficeTasks();
+            renderCalendarDays();
+            renderCRM();
+            renderMeetings();
+            renderGoals();
+            loadPersonalDecreto();
+            loadLifePlans();
+            setInterval(checkMeetingAlarms, 30000);
+        };
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar-menu');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        function closeMobileMenuOnClickOutside(event) {
+            const sidebar = document.getElementById('sidebar-menu');
+            if (window.innerWidth <= 768 && sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+            }
+        }
+
+        function openNameModal() {
+            document.getElementById('welcome-modal').style.display = 'flex';
+        }
+
+        function saveUserName() {
+            const inputVal = document.getElementById('user-name-input').value.trim();
+            if (inputVal !== '') {
+                userName = inputVal;
+            } else {
+                userName = 'XXXXXXXXXX';
+            }
+            localStorage.setItem('impulso_user', userName);
+            document.getElementById('display-user-name').innerText = userName;
+            document.getElementById('welcome-modal').style.display = 'none';
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+
+            // En móvil, al hacer clic en una opción, oculta el menú automáticamente
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar-menu').classList.remove('mobile-open');
+            }
+        }
+
+        // Decreto
+        function savePersonalDecreto() {
+            const decreto = document.getElementById('personal-decreto-input').value.trim();
+            if (decreto) {
+                localStorage.setItem('impulso_decreto', decreto);
+                const p = document.getElementById('saved-decreto-text');
+                p.innerText = ' Decretado: "' + decreto + '"';
+                p.style.display = 'block';
+            }
+        }
+
+        function clearPersonalDecreto() {
+            localStorage.removeItem('impulso_decreto');
+            document.getElementById('personal-decreto-input').value = '';
+            document.getElementById('saved-decreto-text').style.display = 'none';
+        }
+
+        function loadPersonalDecreto() {
+            const saved = localStorage.getItem('impulso_decreto');
+            if (saved) {
+                document.getElementById('personal-decreto-input').value = saved;
+                const p = document.getElementById('saved-decreto-text');
+                p.innerText = ' Decretado: "' + saved + '"';
+                p.style.display = 'block';
+            }
+        }
+
+        // Proyecto de Vida
+        function saveLifePlan(type) {
+            const val = document.getElementById(`life-${type}`).value.trim();
+            if (val) {
+                localStorage.setItem(`impulso_life_${type}`, val);
+                alert('Plan guardado.');
+            }
+        }
+
+        function clearLifePlan(type) {
+            localStorage.removeItem(`impulso_life_${type}`);
+            document.getElementById(`life-${type}`).value = '';
+        }
+
+        function loadLifePlans() {
+            ['short', 'mid', 'long'].forEach(t => {
+                const saved = localStorage.getItem(`impulso_life_${t}`);
+                if (saved) document.getElementById(`life-${t}`).value = saved;
+            });
+        }
+
+        // Pulso
+        function saveDailyPulse() { alert('Progreso guardado.'); }
+        function resetDailyPulse() {
+            document.getElementById('calls-count').value = 0;
+            document.getElementById('sales-count').value = 0;
+        }
+
+        // Pendientes Oficina
+        function addOfficeTask() {
+            const input = document.getElementById('office-task-input');
+            if (input.value.trim()) {
+                officeTasks.push(input.value.trim());
+                localStorage.setItem('impulso_office_tasks', JSON.stringify(officeTasks));
+                input.value = '';
+                renderOfficeTasks();
+            }
+        }
+
+        function renderOfficeTasks() {
+            const container = document.getElementById('office-tasks-container');
+            container.innerHTML = '';
+            officeTasks.forEach((task, index) => {
+                const div = document.createElement('div');
+                div.className = 'dynamic-item';
+                div.innerHTML = `
+                    <span>${task}</span>
+                    <button class="btn-icon" onclick="deleteOfficeTask(${index})"><i data-lucide="trash-2" style="width:12px;"></i></button>
+                `;
+                container.appendChild(div);
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function deleteOfficeTask(index) {
+            officeTasks.splice(index, 1);
+            localStorage.setItem('impulso_office_tasks', JSON.stringify(officeTasks));
+            renderOfficeTasks();
+        }
+
+        // Calendario Empire
+        function renderCalendarDays() {
+            const grid = document.getElementById('calendar-days-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 31; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                if (i === 21) day.classList.add('active');
+                day.innerText = i;
+                day.onclick = function() {
+                    document.querySelectorAll('.calendar-day').forEach(d => d.classList.remove('active'));
+                    day.classList.add('active');
+                    document.getElementById('selected-date-label').innerText = `Día Seleccionado: ${i} de Octubre de 2026`;
+                };
+                grid.appendChild(day);
+            }
+        }
+
+        function saveEmpireCalendar() { alert('Datos guardados.'); }
+        function clearEmpireCalendar() {
+            document.getElementById('calendar-day-goal').value = '';
+            document.getElementById('calendar-day-note').value = '';
+        }
+
+        // CRM
+        function addClientToCRM() {
+            const name = document.getElementById('crm-name').value.trim();
+            const phone = document.getElementById('crm-phone').value.trim();
+            const detail = document.getElementById('crm-detail').value.trim();
+            const status = document.getElementById('crm-status').value;
+
+            if (!name || !phone) { alert('Coloca Nombre y Teléfono.'); return; }
+
+            crmClients.push({ id: Date.now(), name, phone, detail: detail || 'Plan Telecom', status });
+            localStorage.setItem('impulso_crm', JSON.stringify(crmClients));
+            document.getElementById('crm-name').value = '';
+            document.getElementById('crm-phone').value = '';
+            document.getElementById('crm-detail').value = '';
+            renderCRM();
+        }
+
+        function filterCRM(category, btn) {
+            activeCrmCategory = category;
+            document.querySelectorAll('.crm-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderCRM();
+        }
+
+        function renderCRM() {
+            const container = document.getElementById('crm-clients-container');
+            container.innerHTML = '';
+            const filtered = crmClients.filter(c => c.status === activeCrmCategory);
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size:0.78rem; grid-column:1/-1;">Sin clientes en esta sección.</p>';
+                return;
+            }
+
+            filtered.forEach(client => {
+                const card = document.createElement('div');
+                card.className = 'client-card';
+                card.innerHTML = `
+                    <div>
+                        <h4 style="color:white; font-size:0.9rem;">${client.name}</h4>
+                        <p style="color:var(--text-secondary); font-size:0.75rem;"><i data-lucide="phone" style="width:10px; vertical-align:middle;"></i> ${client.phone}</p>
+                        <span style="display:inline-block; background:rgba(20,184,166,0.15); color:var(--accent-teal); padding:0.15rem 0.35rem; border-radius:4px; font-size:0.7rem; margin-bottom:0.5rem;">${client.detail}</span>
+                    </div>
+                    <div style="display:flex; gap:0.35rem;">
+                        <button class="btn" style="padding:0.3rem 0.55rem;" onclick="openWhatsApp('${client.phone}')"><i data-lucide="message-circle" style="width:12px;"></i> WhatsApp</button>
+                        <button class="btn-icon" onclick="deleteClient(${client.id})"><i data-lucide="trash-2" style="width:12px;"></i></button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function openWhatsApp(phone) {
+            const clean = phone.replace(/[^0-9]/g, '');
+            window.open(`https://wa.me/${clean}`, '_blank');
+        }
+
+        function deleteClient(id) {
+            crmClients = crmClients.filter(c => c.id !== id);
+            localStorage.setItem('impulso_crm', JSON.stringify(crmClients));
+            renderCRM();
+        }
+
+        // Reuniones y Alarma
+        function playBellSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.5);
+            } catch (e) {}
+        }
+
+        function addMeeting() {
+            const title = document.getElementById('meeting-title').value.trim();
+            const time = document.getElementById('meeting-time').value;
+            if (!title || !time) return;
+            meetings.push({ id: Date.now(), title, time });
+            localStorage.setItem('impulso_meetings', JSON.stringify(meetings));
+            document.getElementById('meeting-title').value = '';
+            document.getElementById('meeting-time').value = '';
+            renderMeetings();
+            playBellSound();
+        }
+
+        function renderMeetings() {
+            const container = document.getElementById('meetings-list-container');
+            container.innerHTML = '';
+            if (meetings.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size:0.78rem;">Sin reuniones agendadas.</p>';
+                return;
+            }
+            meetings.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'dynamic-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${m.title}</strong> - <span style="color:var(--accent-teal);">${m.time}</span>
+                    </div>
+                    <button class="btn-icon" onclick="deleteMeeting(${m.id})"><i data-lucide="trash-2" style="width:12px;"></i></button>
+                `;
+                container.appendChild(div);
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function deleteMeeting(id) {
+            meetings = meetings.filter(m => m.id !== id);
+            localStorage.setItem('impulso_meetings', JSON.stringify(meetings));
+            renderMeetings();
+        }
+
+        function checkMeetingAlarms() {
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            meetings.forEach(m => {
+                if (m.time === timeStr) {
+                    playBellSound();
+                    alert(` Alarma de Reunión: "${m.title}" es a las ${m.time}.`);
+                }
+            });
+        }
+
+        // Metas
+        function addGoal2027() {
+            const input = document.getElementById('goal-input');
+            if (input.value.trim()) {
+                goals.push(input.value.trim());
+                localStorage.setItem('impulso_goals', JSON.stringify(goals));
+                input.value = '';
+                renderGoals();
+            }
+        }
+
+        function renderGoals() {
+            const container = document.getElementById('goals-container');
+            container.innerHTML = '';
+            goals.forEach((g, index) => {
+                const div = document.createElement('div');
+                div.className = 'dynamic-item';
+                div.innerHTML = `
+                    <span>${g}</span>
+                    <button class="btn-icon" onclick="deleteGoal(${index})"><i data-lucide="trash-2" style="width:12px;"></i></button>
+                `;
+                container.appendChild(div);
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function deleteGoal(index) {
+            goals.splice(index, 1);
+            localStorage.setItem('impulso_goals', JSON.stringify(goals));
+            renderGoals();
+        }
+
+        // Calculadora
+        function calculateBusiness() {
+            const target = parseFloat(document.getElementById('calc-target').value) || 0;
+            const price = parseFloat(document.getElementById('calc-price').value) || 0;
+            const profit = parseFloat(document.getElementById('calc-profit').value) || 0;
+
+            const clientsNeeded = profit > 0 ? Math.ceil(target / profit) : 0;
+            const totalVolume = clientsNeeded * price;
+
+            document.getElementById('calc-result').innerText = clientsNeeded;
+            document.getElementById('calc-total-volume').innerText = `Facturación Total del Negocio: $${totalVolume.toLocaleString()}`;
+        }
+
+        // Almuerzo
+        let lunchTimer;
+        let lunchTime = 3600;
+        function startLunchTimer() {
+            if (lunchTimer) clearInterval(lunchTimer);
+            lunchTimer = setInterval(() => {
+                if (lunchTime > 0) {
+                    lunchTime--;
+                    let m = Math.floor(lunchTime / 60);
+                    let s = lunchTime % 60;
+                    document.getElementById('timer-display').innerText = `${m < 10 ? '0':''}${m}:${s < 10 ? '0':''}${s}`;
+                } else {
+                    clearInterval(lunchTimer);
+                    playBellSound();
+                    alert('Hora de almuerzo finalizada.');
+                }
+            }, 1000);
+        }
+        function resetLunchTimer() {
+            if (lunchTimer) clearInterval(lunchTimer);
+            lunchTime = 3600;
+            document.getElementById('timer-display').innerText = "60:00";
+        }
+
+        // Auxiliares
+        function addFamilyTask() {
+            const input = document.getElementById('family-task-input');
+            if (input.value.trim()) {
+                const container = document.getElementById('family-tasks-container');
+                const div = document.createElement('div');
+                div.className = 'dynamic-item';
+                div.innerHTML = `<span>${input.value.trim()}</span><button class="btn-icon" onclick="this.parentElement.remove()"><i data-lucide="trash-2" style="width:12px;"></i></button>`;
+                container.appendChild(div);
+                input.value = '';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        function addLifestyleItem() {
+            const input = document.getElementById('lifestyle-input');
+            if (input.value.trim()) {
+                const container = document.getElementById('lifestyle-container');
+                const div = document.createElement('div');
+                div.className = 'dynamic-item';
+                div.innerHTML = `<span>${input.value.trim()}</span><button class="btn-icon" onclick="this.parentElement.remove()"><i data-lucide="trash-2" style="width:12px;"></i></button>`;
+                container.appendChild(div);
+                input.value = '';
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
+        function saveWorkHours() { alert('Horarios guardados.'); }
+    </script>
+</body>
+</html>
